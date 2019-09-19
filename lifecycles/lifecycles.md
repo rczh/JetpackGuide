@@ -20,7 +20,7 @@
 　　用来表示lifecycles跟踪的Activity或者Fragment的当前状态
    
    
-   ![](https://github.com/rczh/AndroidJetpackGuide/blob/master/lifecycles/lifecycle-states.svg) 
+   ![](https://github.com/rczh/JetpackGuide/blob/master/lifecycles/lifecycle-states.svg) 
 
 ### LifecycleObserver
 　　Activity或者Fragment的生命周期观察者对象需要实现LifecycleObserver接口，并且通过OnLifecycleEvent注解方法来响应Activity或者Fragment的生命周期状态
