@@ -104,7 +104,55 @@ class CustomLiveData {
 
 通过懒加载方式初始化livedata对象，在使用时初始化
 
+* ### 扩展livedata
+
+```kotlin
+class StockLiveData(symbol: String) : LiveData<BigDecimal>() {
+    private val stockManager: StockManager =
+        StockManager(symbol)
+
+    private val listener = { price: BigDecimal ->
+        value = price
+    }
+
+    override fun onActive() {
+        stockManager.requestPriceUpdates(listener)
+    }
+
+    override fun onInactive() {
+        stockManager.removeUpdates(listener)
+    }
+
+    companion object {
+        private lateinit var sInstance: StockLiveData
+        //创建一个StockLiveData单例对象
+        @MainThread
+        fun get(symbol: String): StockLiveData {
+            sInstance = if (Companion::sInstance.isInitialized) sInstance else StockLiveData(
+                symbol
+            )
+            return sInstance
+        }
+    }
+}
+```
+
+当livedata有一个处于活动状态的观察者对象时调用onActive方法，可以在该方法中实现初始化操作
+
+当livedata没有任何处于活动状态的观察者对象时调用onInactive方法，可以在该方法中实现清理操作
 
 
+```kotlin
+class MyFragment : Fragment() {
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+        //Multiple fragments and activities can observe the livedata instance
+        StockLiveData.get("symbol")
+            .observe(this, Observer<BigDecimal> { price: BigDecimal? ->
+            // Update the UI.
+        })
+    }
+}
+```
 
-
+livedata是生命周期感知组件，可以在多个activity或者fragment之间共享
