@@ -218,7 +218,7 @@ class MyFragment : Fragment() {
     }
 ```
 
-　　switchMap变化的实现基于MediatorLiveData，用来观察getUser函数返回的livedata值的变化。当userId变化时switchMap会回调并且执行getUser函数，如果getUser函数返回新的livedata对象，MediatorLiveData会重新注册观察新的livedata对象
+　　switchMap变换的实现基于MediatorLiveData，用来观察getUser函数返回的livedata值的变化。当userId变化时switchMap会回调并且执行getUser函数，如果getUser函数返回新的livedata对象，MediatorLiveData会重新注册观察新的livedata对象
   
   ```kotlin
       public static <X, Y> LiveData<Y> switchMap(
