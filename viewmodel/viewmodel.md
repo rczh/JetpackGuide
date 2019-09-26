@@ -4,6 +4,8 @@
 
 ## 2.作用
 　　viewmodel用来将数据从activity中分离出来。viewmodel能够保证当旋转屏幕时activity触发重建，viewmodel里面的数据保持不变
+  
+　　通常将livedata存放在viewmodel中使用
 
 ## 3.实现原理
 　　系统提供ViewModelProvider类用来获取viewmodel对象，ViewModelProvider的初始化方法需要传入activity对象，activity中会保存一个ViewModelStore对象，viewmodel保存在ViewModelStore对象的集合中
