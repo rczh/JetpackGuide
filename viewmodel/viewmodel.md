@@ -8,6 +8,8 @@ viewmodel用来将数据从activity中分离出来。viewmodel能够保证当旋
 ## 3.实现原理
 系统提供ViewModelProvider类用来获取viewmodel对象，ViewModelProvider的初始化方法需要传入activity对象，activity中会保存一个ViewModelStore对象，viewmodel保存在ViewModelStore对象的集合中
 
+ComponentActivity构造函数中会创建LifecycleEventObserver对象来观察activity的生命周期状态，当activity由于屏幕旋转触发销毁时系统不会执行ViewModelStore的clear方法，从而实现activity转屏重建但是viewmodel保留的功能
+
 
 
 ```java
@@ -33,7 +35,7 @@ viewmodel用来将数据从activity中分离出来。viewmodel能够保证当旋
             NonConfigurationInstances nc =
                     (NonConfigurationInstances) getLastNonConfigurationInstance();
             if (nc != null) {
-                // Restore the ViewModelStore from NonConfigurationInstances
+                //转屏时activity会重新创建，这时从rc中获取转屏之前activity中的viewModelStore对象
                 mViewModelStore = nc.viewModelStore;
             }
             if (mViewModelStore == null) {
@@ -60,3 +62,6 @@ viewmodel用来将数据从activity中分离出来。viewmodel能够保证当旋
             }
         });
 ```        
+
+## 4. viewmodel的生命周期
+
