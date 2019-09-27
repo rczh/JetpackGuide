@@ -4,3 +4,5 @@
 [livedata](livedata/livedata.md)
 
 [viewmodel](viewmodel/viewmodel.md)
+
+[databinding](databinding/databinding.md)
