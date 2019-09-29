@@ -187,7 +187,7 @@ class MyHandlers {
             android:onClick="@{() -> presenter.onSaveClick(task)}"/>
 ```
 
-　　仅仅lamdba表达式的返回结果类型必须和click事件返回类型吻合。lamdba表达式应该尽可能简单
+　　lamdba表达式中的方法可以自定义参数，仅仅返回结果类型必须和click事件返回类型吻合。lamdba表达式应该尽可能简单
 
 ```kotlin
 class Presenter {
