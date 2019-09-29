@@ -1,12 +1,12 @@
 # databinding
 ## 1.定义
-databinding使用声明形式的表达式语言将布局中的UI组件绑定到数据源
+　　databinding使用声明形式的表达式语言将布局中的UI组件绑定到数据源
 
 ## 2.作用
-databinding用来删除activity中的findViewById调用，使activity更加简单且易于维护
+　　databinding用来删除activity中的findViewById调用，使activity更加简单且易于维护
 
 ## 3.实现原理
-定义一个databinding布局文件，布局文件以layout作为根节点，包括一个data节点和一个view layout节点。view layout节点中的UI组件通过表达式语言引用data节点中定义的变量
+　　定义一个databinding布局文件，布局文件以layout作为根节点，包括一个data节点和一个view layout节点。view layout节点中的UI组件通过表达式语言引用data节点中定义的变量
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -37,7 +37,7 @@ databinding用来删除activity中的findViewById调用，使activity更加简�
 </layout>
 ```
 
-databinding库为每一个布局文件自动生成将布局中的UI组件与数据对象绑定所需的绑定类，绑定类中保存所有包含表达式语言的UI组件和data变量的引用以及它们之间的绑定关系
+　　databinding库为每一个布局文件自动生成将布局中的UI组件与数据对象绑定所需的绑定类，绑定类中保存所有包含表达式语言的UI组件和data变量的引用以及它们之间的绑定关系
 
 ```java
 public abstract class ActivityBindingMainBinding extends ViewDataBinding {
@@ -57,7 +57,7 @@ public abstract class ActivityBindingMainBinding extends ViewDataBinding {
 }
 ```
 
-通常在activity中使用DataBindingUtil.setContentView方法初始化绑定类，并且通过绑定类中的set方法初始化data变量
+　　通常在activity中使用DataBindingUtil.setContentView方法初始化绑定类，并且通过绑定类中的set方法初始化data变量
 
 ```kotlin
 data class User(var firstName: String, var lastName: String)
@@ -79,7 +79,7 @@ override fun onCreate(savedInstanceState: Bundle?) {
 }
 ```
 
-DataBindingUtil.setContentView方法调用bind方法，bind方法用来建立layout布局文件和绑定类的对应关系
+　　DataBindingUtil.setContentView方法调用bind方法，bind方法用来建立layout布局文件和绑定类的对应关系
 
 ```java
     static <T extends ViewDataBinding> T bind(DataBindingComponent bindingComponent, View root, int layoutId) {
@@ -107,7 +107,7 @@ DataBindingUtil.setContentView方法调用bind方法，bind方法用来建立lay
   }
 ```
 
-绑定类Impl中的executeBindings方法用来执行具体的绑定操作，将data变量的内容赋值给对应的UI组件
+　　绑定类Impl中的executeBindings方法用来执行具体的绑定操作，将data变量的内容赋值给对应的UI组件
 
 ```java
 @Override
@@ -155,3 +155,50 @@ DataBindingUtil.setContentView方法调用bind方法，bind方法用来建立lay
         }
     }
 ```
+
+## 4.事件处理
+　　databinding允许在表达式中定义事件处理方法
+
+* ### 方法引用
+　　通过方法引用定义click事件
+
+```xml
+<TextView android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="@{handlers::onClickFriend}"/>
+```
+
+　　引用的方法定义必须与click事件方法定义完全吻合
+
+```kotlin
+class MyHandlers {
+    fun onClickFriend(view: View) {
+        println("onClickFriend start")
+    }
+}
+```
+
+* ### 监听绑定
+　　允许使用lamdba表达式定义click事件
+
+```xml
+<TextView android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="@{() -> presenter.onSaveClick(task)}"/>
+```
+
+　　仅仅lamdba表达式的返回结果类型必须和click事件返回类型吻合。lamdba表达式应该尽可能简单
+
+```kotlin
+class Presenter {
+    fun onSaveClick(task: Task){
+        println("onSaveClick start")
+    }
+}
+```
+
+
+
+
+
+
