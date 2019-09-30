@@ -113,3 +113,95 @@ class BindingCustomObservableActivity : AppCompatActivity() {
 ```
 
 * ### Observable字段类型
+当数据对象类中只有少数字段需要在值改变后更新UI时，可以将字段声明为Observable字段类型
+
+```kotlin
+class ObserableUser {
+    val firstName = ObservableField<String>()
+    val lastName = ObservableField<String>()
+    val map = ObservableArrayMap<String, Any>().apply {
+        put("okey1", "Google")
+        put("okey2", "Inc.")
+        put("okey3", 17)
+    }
+}
+```
+
+与Observable接口方式不同，绑定类Impl会在executeBindings方法中对数据对象字段执行updateRegistration方法
+
+Observable字段类型继承于BaseObservable类，实现原理相同
+
+```java
+@Override
+    protected void executeBindings() {
+        long dirtyFlags = 0;
+        synchronized(this) {
+            dirtyFlags = mDirtyFlags;
+            mDirtyFlags = 0;
+        }
+        java.lang.String userLastNameGet = null;
+        androidx.databinding.ObservableField<java.lang.String> userFirstName = null;
+        com.example.databinding.ObserableUser user = mUser;
+        androidx.databinding.ObservableField<java.lang.String> userLastName = null;
+        androidx.databinding.ObservableArrayMap<java.lang.String, java.lang.Object> userMap = null;
+        java.lang.Object userMapOkey1 = null;
+        java.lang.String userFirstNameGet = null;
+
+        if ((dirtyFlags & 0x1fL) != 0) {
+            if ((dirtyFlags & 0x19L) != 0) {
+                    if (user != null) {
+                        // read user.firstName
+                        userFirstName = user.getFirstName();
+                    }
+                    updateRegistration(0, userFirstName);
+                    if (userFirstName != null) {
+                        // read user.firstName.get()
+                        userFirstNameGet = userFirstName.get();
+                    }
+            }
+            if ((dirtyFlags & 0x1aL) != 0) {
+                    if (user != null) {
+                        // read user.lastName
+                        userLastName = user.getLastName();
+                    }
+                    updateRegistration(1, userLastName);
+                    if (userLastName != null) {
+                        // read user.lastName.get()
+                        userLastNameGet = userLastName.get();
+                    }
+            }
+            if ((dirtyFlags & 0x1cL) != 0) {
+                    if (user != null) {
+                        // read user.map
+                        userMap = user.getMap();
+                    }
+                    updateRegistration(2, userMap);
+                    if (userMap != null) {
+                        // read user.map.okey1
+                        userMapOkey1 = userMap.get("okey1");
+                    }
+            }
+        }
+        // batch finished
+        if ((dirtyFlags & 0x19L) != 0) {
+            // api target 1
+            androidx.databinding.adapters.TextViewBindingAdapter.setText(this.mboundView1, userFirstNameGet);
+        }
+        if ((dirtyFlags & 0x1aL) != 0) {
+            // api target 1
+            androidx.databinding.adapters.TextViewBindingAdapter.setText(this.mboundView2, userLastNameGet);
+        }
+        if ((dirtyFlags & 0x1cL) != 0) {
+            // api target 1
+            androidx.databinding.adapters.TextViewBindingAdapter.setText(this.mboundView3, (java.lang.CharSequence) userMapOkey1);
+        }
+    }
+```
+
+对于ObservableArrayMap类型，可以直接在布局文件表达式中使用key进行引用
+
+```xml
+<TextView android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{user.map.okey1}"/>
+```
