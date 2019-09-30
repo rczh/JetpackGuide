@@ -6,3 +6,5 @@
 [viewmodel](viewmodel/viewmodel.md)
 
 [databinding](databinding/databinding.md)
+
+* [observalbe data objects](databinding/observable.md)
