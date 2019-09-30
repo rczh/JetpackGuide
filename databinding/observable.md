@@ -66,6 +66,8 @@
 
 Bindable注解用来通知databinding生成BR中的属性字段
 
+如果数据对象类不能继承BaseObservable，可以实现Observable接口并且使用PropertyChangeRegistry类注册、通知观察者
+
 ```kotlin
 class CustomObserableUser : BaseObservable() {
 
