@@ -85,4 +85,29 @@ class CustomObserableUser : BaseObservable() {
 }
 ```
 
+初始化数据对象时databinding将为数据对象注册观察者
+
+```kotlin
+class BindingCustomObservableActivity : AppCompatActivity() {
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        val binding: ActivityBindingCustomObservableMainBinding = DataBindingUtil.setContentView(this, R.layout.activity_binding_custom_observable_main)
+        var myUser = CustomObserableUser()
+        myUser.firstName = "first name aa"
+        myUser.lastName = "last name"
+        
+        //绑定类Impl会调用updateRegistration方法注册观察者
+        binding.user = myUser
+
+        Handler().postDelayed({
+            //自动通知databinding更新UI
+            myUser.firstName = "new first name"
+            myUser.lastName = "new last name"
+        }, 2000)
+    }
+}
+```
+
 * ### Observable字段类型
