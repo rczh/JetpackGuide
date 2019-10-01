@@ -1,15 +1,15 @@
 # observable data objects
 ## 1.定义
-通常情况下，更新绑定类中数据对象的值并不会触发databinding更新UI。databinding提供observable类，用来实现当数据对象值更新后通知databinding更新UI的功能
+　　通常情况下，更新绑定类中数据对象的值并不会触发databinding更新UI。databinding提供observable类，用来实现当数据对象值更新后通知databinding更新UI的功能
 
 ## 2.作用
-用来在绑定类中数据对象值更新后通知databinding更新UI
+　　用来在绑定类中数据对象值更新后通知databinding更新UI
 
 ## 3.实现原理
 * ### Observable接口
-数据对象类需要实现Observable接口，当初始化数据对象时绑定类Impl会调用updateRegistration方法，该方法调用WeakPropertyListener.addListener方法，addListener方法回调addOnPropertyChangedCallback方法注册WeakPropertyListener对象作为数据对象观察者
+　　数据对象类需要实现Observable接口，当初始化数据对象时绑定类Impl会调用updateRegistration方法，该方法调用WeakPropertyListener.addListener方法，addListener方法回调addOnPropertyChangedCallback方法注册WeakPropertyListener对象作为数据对象观察者
 
-当数据对象类中属性值发生变化时调用OnPropertyChangedCallback.onPropertyChanged方法，该方法调用WeakPropertyListener.onPropertyChanged方法，WeakPropertyListener.onPropertyChanged方法最终触发绑定类执行executeBindings方法更新UI
+　　当数据对象类中属性值发生变化时调用OnPropertyChangedCallback.onPropertyChanged方法，该方法调用WeakPropertyListener.onPropertyChanged方法，WeakPropertyListener.onPropertyChanged方法最终触发绑定类执行executeBindings方法更新UI
 
 ```java
       public interface Observable {
@@ -62,11 +62,11 @@
     
 ```
 
-为了简单起见，databinding提供了BaseObservable类封装了Observable接口，数据对象类需要在属性值变化时调用notifyPropertyChanged方法通知观察者
+　　为了简单起见，databinding提供了BaseObservable类封装了Observable接口，数据对象类需要在属性值变化时调用notifyPropertyChanged方法通知观察者
 
-Bindable注解用来通知databinding生成BR中的属性字段
+　　Bindable注解用来通知databinding生成BR中的属性字段
 
-如果数据对象类不能继承BaseObservable，可以实现Observable接口并且使用PropertyChangeRegistry类注册、通知观察者
+　　如果数据对象类不能继承BaseObservable，可以实现Observable接口并且使用PropertyChangeRegistry类注册、通知观察者
 
 ```kotlin
 class CustomObserableUser : BaseObservable() {
@@ -87,7 +87,7 @@ class CustomObserableUser : BaseObservable() {
 }
 ```
 
-初始化数据对象时databinding将为数据对象注册观察者
+　　初始化数据对象时databinding将为数据对象注册观察者
 
 ```kotlin
 class BindingCustomObservableActivity : AppCompatActivity() {
@@ -113,7 +113,7 @@ class BindingCustomObservableActivity : AppCompatActivity() {
 ```
 
 * ### Observable字段类型
-当数据对象类中只有少数字段需要在值改变后更新UI时，可以将字段声明为Observable字段类型
+　　当数据对象类中只有少数字段需要在值改变后更新UI时，可以将字段声明为Observable字段类型
 
 ```kotlin
 class ObserableUser {
@@ -127,9 +127,9 @@ class ObserableUser {
 }
 ```
 
-与Observable接口方式不同，绑定类Impl会在executeBindings方法中对数据对象字段执行updateRegistration方法
+　　与Observable接口方式不同，绑定类Impl会在executeBindings方法中对数据对象字段调用updateRegistration方法
 
-Observable字段类型继承于BaseObservable类，实现原理相同
+　　Observable字段类型继承于BaseObservable类，实现原理相同
 
 ```java
 @Override
@@ -198,7 +198,7 @@ Observable字段类型继承于BaseObservable类，实现原理相同
     }
 ```
 
-对于ObservableArrayMap类型，可以直接在布局文件表达式中使用key进行引用
+　　对于ObservableArrayMap类型，可以直接在布局文件表达式中使用key进行引用
 
 ```xml
 <TextView android:layout_width="wrap_content"
