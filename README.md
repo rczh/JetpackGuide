@@ -8,3 +8,5 @@
 [databinding](databinding/databinding.md)
 
 * [observalbe data objects](databinding/observable.md)
+
+* [binding adapters](databinding/adapter.md)
