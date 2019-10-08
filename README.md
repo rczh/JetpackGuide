@@ -10,3 +10,5 @@
 * [observalbe data objects](databinding/observable.md)
 
 * [binding adapters](databinding/adapter.md)
+
+* [two-way binding](databinding/twoway.md)
