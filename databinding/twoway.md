@@ -55,3 +55,10 @@ class LoginViewModel : BaseObservable() {
 ```
 
 双向绑定的实现就是调用被观察者数据对象的set方法
+
+## 4.实例
+* ###  自定义属性使用双向绑定
+
+如何避免无限循环
+
+* ### 双向绑定表达式中使用Converters类型转换
