@@ -57,7 +57,60 @@ class LoginViewModel : BaseObservable() {
 双向绑定的实现就是调用被观察者数据对象的set方法
 
 ## 4.实例
-* ###  自定义属性使用双向绑定
+* ###  自定义view使用双向绑定
+
+为自定义view定义一个自定义属性，属性值为双向绑定表达式
+
+```xml
+<com.example.databinding.twoway.MyView
+            app:test="@={customViewModel.realValue}"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"/>
+```
+
+使用BindingAdapter注解为自定义属性定义set方法，使用InverseBindingAdapter注解定义get方法
+
+```kotlin
+@BindingAdapter("test")
+fun setRealValue(view: MyView, value: Int) {
+    if(view.myValue != value){
+        view.myValue = value
+        view.setText((value).toString())
+    }
+}
+
+@InverseBindingAdapter(attribute = "test")
+fun getRealValue(editText: MyView): Int {
+    return editText.myValue
+}
+```
+
+databinding为使用双向绑定表达式的UI组件另外生成一个自定义属性，属性名为基础属性名加上AttrChanged后缀，使用BindingAdapter注解为这个自定义属性定义事件处理方法，该方法接收一个InverseBindingListener参数，用来当页面发生变化时通知databinding框架更新数据对象
+
+```kotlin
+@BindingAdapter("app:testAttrChanged")
+fun setListener(editText : MyView, listener : InverseBindingListener ) {
+    if (listener != null) {
+        editText.addTextChangedListener(object : TextWatcher{
+            override fun afterTextChanged(s: Editable?) {
+                listener.onChange()
+            }
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+            }
+        })
+    }
+}
+```
+
+绑定类Impl会在第一次执行executeBindings方法时调用该事件处理方法进行初始化
+
+```java
+com.example.databinding.twoway.TwoWayBindingAdapterKt.setListener(this.mboundView2, mboundView2testAttrChanged);
+```
 
 如何避免无限循环
 
