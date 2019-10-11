@@ -129,7 +129,7 @@ fun setListener(editText : MyView, listener : InverseBindingListener ) {
 
 　　注意：页面更新会触发onChange方法，onChange方法调用数据对象的set方法，set方法调用notifyPropertyChanged触发databinding执行executeBindings更新绑定状态，executeBindings方法调用BindingAdapter注解定义的set方法，由于该方法会设置view的属性值，如果view属性值发生变化会再一次触发onChange方法造成循环调用
 
-　　为了避免循环调用的情况，需要在数据对象的set方法或者BindingAdapter注解定义的set方法中判断属性值是否和原始值相同，如果则直接返回
+　　为了避免循环调用的情况，需要在数据对象的set方法或者BindingAdapter注解定义的set方法中判断属性值是否和原始值相同，如果相同则直接返回
 
 * ### 双向绑定表达式中使用Converters类型转换
 
