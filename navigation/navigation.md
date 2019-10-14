@@ -20,6 +20,12 @@ NavController用来管理NavHost中各个fragment目的地之间的导航
 ## 4.实现原理
 * ### 创建NavHostFragment
 
+android:name用来定义NavHost的实现类
+
+app:navGraph用来定义navigation资源文件
+
+app:defaultNavHost表示NavHost的实现类响应系统back键
+
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -31,13 +37,10 @@ NavController用来管理NavHost中各个fragment目的地之间的导航
 
     <fragment
         android:id="@+id/nav_host_fragment"
-        <!--定义NavHost实现类-->      
         android:name="androidx.navigation.fragment.NavHostFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        <!--defaultNavHost定义NavHostFragment类拦截系统back键-->      
         app:defaultNavHost="true"
-         <!--定义navigation资源文件--> 
         app:navGraph="@navigation/nav_graph" />
 
 </RelativeLayout>
@@ -46,5 +49,94 @@ NavController用来管理NavHost中各个fragment目的地之间的导航
 NavHostFragment实现了NavHost接口，它作为一个容器用来切换各个fragment目的地
 
 * ### 创建Navigation graph
+
+app:startDestination用来定义navigation组件启动时的目的地
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/blankFragment">
+
+    <fragment
+        android:id="@+id/blankFragment"
+        android:name="com.example.navgiation.BlankFragment"
+        tools:layout="@layout/fragment_nav_blank"
+        android:label="BlankFragment" >
+        <action
+            android:id="@+id/action_blankFragment_to_blankFragment2"
+            app:destination="@id/blankFragment2" />
+    </fragment>
+    <fragment
+        android:id="@+id/blankFragment2"
+        android:name="com.example.navgiation.BlankFragment2"
+        android:label="BlankFragment2" />
+</navigation>
+```
+
+NavHostFragment使用replace来切换fragment，并且通过fragment事物的addToBackStack实现回退操作。navigation组件自己维护一个栈，
+
+```java
+public NavDestination navigate(@NonNull Destination destination, @Nullable Bundle args,
+            @Nullable NavOptions navOptions, @Nullable Navigator.Extras navigatorExtras) {
+
+       //......  
+        
+        final FragmentTransaction ft = mFragmentManager.beginTransaction();
+        //使用replace方法切换fragment
+        ft.replace(mContainerId, frag);
+        ft.setPrimaryNavigationFragment(frag);
+
+        final @IdRes int destId = destination.getId();
+        final boolean initialNavigation = mBackStack.isEmpty();
+        // TODO Build first class singleTop behavior for fragments
+        final boolean isSingleTopReplacement = navOptions != null && !initialNavigation
+                && navOptions.shouldLaunchSingleTop()
+                && mBackStack.peekLast() == destId;
+
+        boolean isAdded;
+        if (initialNavigation) {
+            isAdded = true;
+        } else if (isSingleTopReplacement) {
+            // Single Top means we only want one instance on the back stack
+            if (mBackStack.size() > 1) {
+                // If the Fragment to be replaced is on the FragmentManager's
+                // back stack, a simple replace() isn't enough so we
+                // remove it from the back stack and put our replacement
+                // on the back stack in its place
+                mFragmentManager.popBackStack(
+                        generateBackStackName(mBackStack.size(), mBackStack.peekLast()),
+                        FragmentManager.POP_BACK_STACK_INCLUSIVE);
+                ft.addToBackStack(generateBackStackName(mBackStack.size(), destId));
+            }
+            isAdded = false;
+        } else {
+            //通过将fragment加入到ft的BackStack中来实现回退操作
+            ft.addToBackStack(generateBackStackName(mBackStack.size() + 1, destId));
+            isAdded = true;
+        }
+        if (navigatorExtras instanceof Extras) {
+            Extras extras = (Extras) navigatorExtras;
+            for (Map.Entry<View, String> sharedElement : extras.getSharedElements().entrySet()) {
+                //可以添加shareElement过场动画
+                ft.addSharedElement(sharedElement.getKey(), sharedElement.getValue());
+            }
+        }
+        ft.setReorderingAllowed(true);
+        ft.commit();
+        // The commit succeeded, update our view of the world
+        if (isAdded) {
+            //navigation中维护一个栈，用来判断弹出操作
+            mBackStack.add(destId);
+            return destination;
+        } else {
+            return null;
+        }
+    }
+```
+
+注意：由于NavHostFragment使用replace来切换fragment，每次replace时都会执行fragment的onCreateView方法。对于那些需要执行hide，show来保留原有fragment状态的情况，navigation并不适用
 
 
