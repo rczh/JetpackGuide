@@ -5,7 +5,9 @@ navigation用来在应用程序的各个fragment目的地之间进行切换
 ## 2.作用
 navigation主要用来封装fragment切换的事物操作
 
-navigation组件被设计用来在拥有一个activity和多个fragment的程序中使用。对于拥有多个activity的程序，每一个activity应该包含一个navigation组件
+navigation组件被设计用来在拥有一个activity和多个fragment的程序中使用
+
+对于拥有多个activity的程序，每一个activity应该包含一个navigation组件
 
 ## 3.组成部分
 * ### Navigation graph
