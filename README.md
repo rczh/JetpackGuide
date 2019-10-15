@@ -1,4 +1,6 @@
 # AndroidJetpackGuide
+这篇文章主要对google官网的Jetpack框架组件进行概况和总结，用来快速掌握Jetpack框架组件的使用方法和实现原理
+
 [lifecycles](lifecycles/lifecycles.md)
 
 [livedata](livedata/livedata.md)
