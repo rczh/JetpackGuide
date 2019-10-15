@@ -1,32 +1,32 @@
 # navigation
 ## 1.定义
-navigation用来在应用程序的各个fragment之间进行切换
+　　navigation用来在应用程序的各个fragment之间进行切换
 
 ## 2.作用
-navigation主要用来封装fragment切换的事物操作
+　　navigation主要用来封装fragment切换的事物操作
 
-navigation组件被设计用来在拥有一个activity和多个fragment的程序中使用，对于拥有多个activity的程序，每一个activity应该包含一个navigation组件
+　　navigation组件被设计用来在拥有一个activity和多个fragment的程序中使用，对于拥有多个activity的程序，每一个activity应该包含一个navigation组件
 
-navigation组件允许将actiivty作为导航目的地，可以实现从fragment导航到activity
+　　navigation组件允许将actiivty作为导航目的地，可以实现从fragment导航到activity
 
 ## 3.组成部分
 * ### Navigation graph
-Navigation graph是一个包含程序中所有fragment和action路径的xml资源文件
+　　Navigation graph是一个包含程序中所有fragment和action路径的xml资源文件
 
 * ### NavHost
-NavHost是一个空的容器用来显示fragment，navigation组件包含一个默认的NavHost接口实现NavHostFragment
+　　NavHost是一个空的容器用来显示fragment，navigation组件包含一个默认的NavHost接口实现NavHostFragment
 
 * ### NavController
-NavController用来管理NavHost中各个fragment之间的导航
+　　NavController用来管理NavHost中各个fragment之间的导航
 
 ## 4.实现原理
 * ### 创建NavHost
 
-android:name用来定义NavHost的实现类
+　　android:name用来定义NavHost的实现类
 
-app:navGraph用来定义navigation资源文件
+　　app:navGraph用来定义navigation资源文件
 
-app:defaultNavHost表示NavHostFragment响应系统back键
+　　app:defaultNavHost表示NavHostFragment响应系统back键
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -48,12 +48,12 @@ app:defaultNavHost表示NavHostFragment响应系统back键
 </RelativeLayout>
 ```
 
-navigation提供了NavHost接口的默认实现NavHostFragment，它作为一个容器用来切换各个fragment目的地
+　　navigation提供了NavHost接口的默认实现NavHostFragment，它作为一个容器用来切换各个fragment
 
 * ### 创建Navigation graph
-app:startDestination用来定义navigation组件启动时的目的地
+　　app:startDestination用来定义navigation组件启动时的fragment
 
-action用来定义fragment之间的跳转路径
+　　action用来定义fragment之间的跳转路径
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -79,7 +79,7 @@ action用来定义fragment之间的跳转路径
 </navigation>
 ```
 
-NavHostFragment使用ft.replace方法来切换fragment，并且通过ft.addToBackStack方法将fragment入栈来实现回退操作。与此同时，FragmentNavigator和NavController内部各自维护一个栈，用来处理回退逻辑
+　　NavHostFragment使用ft.replace方法来切换fragment，并且通过ft.addToBackStack方法将fragment入栈来实现回退操作。与此同时，FragmentNavigator和NavController内部各自维护一个栈，用来处理回退逻辑
 
 ```java
 public NavDestination navigate(@NonNull Destination destination, @Nullable Bundle args,
@@ -158,11 +158,11 @@ public NavDestination navigate(@NonNull Destination destination, @Nullable Bundl
     
 ```
 
-注意：由于NavHostFragment使用ft.replace方法来切换fragment，每次执行replace方法时都会调用fragment.onCreateView方法。对于那些需要执行ft.hide，ft.show方法来保留原有fragment状态的需求，navigation组件并不适用
+　　注意：由于NavHostFragment使用ft.replace方法来切换fragment，每次执行replace方法时都会调用fragment.onCreateView方法。对于那些需要执行ft.hide，ft.show方法来保留原有fragment状态的需求，navigation组件并不适用
 
 * ### 使用NavController执行导航操作
 
-navigation组件使用NavController.navigate方法来实现具体的导航操作
+　　navigation组件使用NavController.navigate方法来实现具体的导航操作
 
 ```kotlin
         textView.setOnClickListener {
@@ -179,9 +179,9 @@ NavController对象的获取方式：
 
 ## 5.Nested graphs和Global action
 
-对于那些只在某些情况下对用户可见的流程，比如登录流程，可以将其单独作为一个navigation嵌套在父navigation中，或者生成一个独立的navigation然后通过include方式导入到父navigation中
+　　对于那些只在某些情况下对用户可见的流程，比如登录流程，可以将其单独作为一个navigation嵌套在父navigation中，或者生成一个独立的navigation然后通过include方式导入到父navigation中
 
-对于一个拥有多条action路径入口的fragment来说，可以创建一个单独的Global action，在每一条action路径入口上的fragment可以使用这个Global action导航到目标fragment
+　　对于一个拥有多条action路径入口的fragment来说，可以创建一个单独的Global action，在每一条action路径入口上的fragment可以使用这个Global action导航到目标fragment
 
 ```xml
 <!-- 由多个源跳转到同一个目的地时使用global action-->
@@ -191,7 +191,7 @@ NavController对象的获取方式：
 ```
 
 ## 6.popUpTo和popUpToInclusive属性
-action支持popUpTo和popUpToInclusive属性，假设navigation回退栈中已经包含a->b->c，如果从c导航到a时使用app:popUpTo="@+id/a"，回退栈会弹出c和b直到a，然后再入栈a，最后回退栈中会包含两个a。如果使用app:popUpToInclusive="true"，回退栈会弹出c，b和a，然后再入栈a，最后回退栈中只包含一个a
+　　action支持popUpTo和popUpToInclusive属性，假设navigation回退栈中已经包含a->b->c，如果从c导航到a时使用app:popUpTo="@+id/a"，回退栈会弹出c和b直到a，然后再入栈a，最后回退栈中会包含两个a。如果使用app:popUpToInclusive="true"，回退栈会弹出c，b和a，然后再入栈a，最后回退栈中只包含一个a
 
 ```xml
 <action
@@ -203,14 +203,14 @@ action支持popUpTo和popUpToInclusive属性，假设navigation回退栈中已�
 
 ## 7.两种fragment之间传递数据方式
 * ### 使用bundle
-在调用navigation方法时将bundle作为参数
+　　在调用navigation方法时将bundle作为参数
 
 ```kotlin
 var bundle = bundleOf("amount" to amount)
 view.findNavController().navigate(R.id.confirmationAction, bundle)
 ```
 
-目标fragment使用arguments读取bundle值
+　　目标fragment使用arguments读取bundle值
 
 ```kotlin
 val tv = view.findViewById<TextView>(R.id.textViewAmount)
@@ -218,7 +218,7 @@ tv.text = arguments.getString("amount")
 ```
 
 * ### 使用Safe Args
-navigation组件提供Safe Args gradle插件用来生成特定类来传递参数
+　　navigation组件提供Safe Args gradle插件用来生成特定类来传递参数
 
 
 
