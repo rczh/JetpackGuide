@@ -1,32 +1,32 @@
 # navigation
 ## 1.定义
-navigation用来在应用程序的各个fragment目的地之间进行切换
+navigation用来在应用程序的各个fragment之间进行切换
 
 ## 2.作用
 navigation主要用来封装fragment切换的事物操作
 
-navigation组件被设计用来在拥有一个activity和多个fragment的程序中使用
+navigation组件被设计用来在拥有一个activity和多个fragment的程序中使用，对于拥有多个activity的程序，每一个activity应该包含一个navigation组件
 
-对于拥有多个activity的程序，每一个activity应该包含一个navigation组件
+navigation组件允许将actiivty作为导航目的地，可以实现从fragment导航到activity
 
 ## 3.组成部分
 * ### Navigation graph
-Navigation graph是一个包含程序中所有fragment目的地和action路径的xml资源文件
+Navigation graph是一个包含程序中所有fragment和action路径的xml资源文件
 
 * ### NavHost
-NavHost是一个空的容器用来显示fragment目的地，navigation组件包含一个默认的NavHostFragment实现
+NavHost是一个空的容器用来显示fragment，navigation组件包含一个默认的NavHost接口实现NavHostFragment
 
 * ### NavController
-NavController用来管理NavHost中各个fragment目的地之间的导航
+NavController用来管理NavHost中各个fragment之间的导航
 
 ## 4.实现原理
-* ### 创建NavHostFragment
+* ### 创建NavHost
 
 android:name用来定义NavHost的实现类
 
 app:navGraph用来定义navigation资源文件
 
-app:defaultNavHost表示NavHost的实现类响应系统back键
+app:defaultNavHost表示NavHostFragment响应系统back键
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -48,7 +48,7 @@ app:defaultNavHost表示NavHost的实现类响应系统back键
 </RelativeLayout>
 ```
 
-NavHostFragment实现了NavHost接口，它作为一个容器用来切换各个fragment目的地
+navigation提供了NavHost接口的默认实现NavHostFragment，它作为一个容器用来切换各个fragment目的地
 
 * ### 创建Navigation graph
 app:startDestination用来定义navigation组件启动时的目的地
@@ -79,14 +79,13 @@ action用来定义fragment之间的跳转路径
 </navigation>
 ```
 
-NavHostFragment使用ft.replace来切换fragment，并且通过ft.addToBackStack实现回退操作。navigation组件内部自己维护一个栈，用来处理回退逻辑
+NavHostFragment使用ft.replace方法来切换fragment，并且通过ft.addToBackStack方法将fragment入栈来实现回退操作。与此同时，FragmentNavigator和NavController内部各自维护一个栈，用来处理回退逻辑
 
 ```java
 public NavDestination navigate(@NonNull Destination destination, @Nullable Bundle args,
             @Nullable NavOptions navOptions, @Nullable Navigator.Extras navigatorExtras) {
 
        //......  
-        
         final FragmentTransaction ft = mFragmentManager.beginTransaction();
         //使用replace方法切换fragment
         ft.replace(mContainerId, frag);
@@ -131,7 +130,7 @@ public NavDestination navigate(@NonNull Destination destination, @Nullable Bundl
         ft.commit();
         // The commit succeeded, update our view of the world
         if (isAdded) {
-            //navigation中维护一个栈，用来判断弹出操作
+            //FragmentNavigator中维护一个栈，用来处理回退逻辑
             mBackStack.add(destId);
             return destination;
         } else {
@@ -149,6 +148,7 @@ public NavDestination navigate(@NonNull Destination destination, @Nullable Bundl
                     + " saved its state");
             return false;
         }
+        //出栈时执行FragmentManager.popBackStack方法
         mFragmentManager.popBackStack(
                 generateBackStackName(mBackStack.size(), mBackStack.peekLast()),
                 FragmentManager.POP_BACK_STACK_INCLUSIVE);
@@ -158,7 +158,7 @@ public NavDestination navigate(@NonNull Destination destination, @Nullable Bundl
     
 ```
 
-注意：由于NavHostFragment使用replace来切换fragment，每次执行replace方法时都会调用fragment的onCreateView方法。对于那些需要执行hide，show来保留原有fragment状态的情况，navigation组件并不适用
+注意：由于NavHostFragment使用ft.replace方法来切换fragment，每次执行replace方法时都会调用fragment.onCreateView方法。对于那些需要执行ft.hide，ft.show方法来保留原有fragment状态的需求，navigation组件并不适用
 
 * ### 使用NavController执行导航操作
 
@@ -176,3 +176,54 @@ NavController对象的获取方式：
 * Fragment.findNavController()
 * View.findNavController()
 * Activity.findNavController(viewId: Int)
+
+## 5.Nested graphs和Global action
+
+对于那些只在某些情况下对用户可见的流程，比如登录流程，可以将其单独作为一个navigation嵌套在父navigation中，或者生成一个独立的navigation然后通过include方式导入到父navigation中
+
+对于一个拥有多条action路径入口的fragment来说，可以创建一个单独的Global action，在每一条action路径入口上的fragment可以使用这个Global action导航到目标fragment
+
+```xml
+<!-- 由多个源跳转到同一个目的地时使用global action-->
+    <action android:id="@+id/action_pop_out_of_game"
+        app:popUpTo="@id/in_game_nav_graph"
+        app:popUpToInclusive="true"  />
+```
+
+## 6.popUpTo和popUpToInclusive属性
+action支持popUpTo和popUpToInclusive属性，假设navigation回退栈中已经包含a->b->c，如果从c导航到a时使用app:popUpTo="@+id/a"，回退栈会弹出c和b直到a，然后再入栈a，最后回退栈中会包含两个a。如果使用app:popUpToInclusive="true"，回退栈会弹出c，b和a，然后再入栈a，最后回退栈中只包含一个a
+
+```xml
+<action
+        android:id="@+id/action_c_to_a"
+        app:destination="@id/a"
+        app:popUpTo="@+id/a"
+        app:popUpToInclusive="true"/>
+```
+
+## 7.两种fragment之间传递数据方式
+* ### 使用bundle
+在调用navigation方法时将bundle作为参数
+
+```kotlin
+var bundle = bundleOf("amount" to amount)
+view.findNavController().navigate(R.id.confirmationAction, bundle)
+```
+
+目标fragment使用arguments读取bundle值
+
+```kotlin
+val tv = view.findViewById<TextView>(R.id.textViewAmount)
+tv.text = arguments.getString("amount")
+```
+
+* ### 使用Safe Args
+navigation组件提供Safe Args gradle插件用来生成特定类来传递参数
+
+
+
+
+
+
+
+
