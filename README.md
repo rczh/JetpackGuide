@@ -16,3 +16,5 @@
 * [two-way binding](databinding/twoway.md)
 
 [navigation](navigation/navigation.md)
+
+[dagger2](dagger2/dagger2.md)
