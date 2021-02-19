@@ -81,9 +81,75 @@ interface CommonComponent {
 ```
 
 ## 实现原理
+Dagger2会为Component注解的接口生成一个实现类DaggerCommonComponent。DaggerCommonComponent类中包含CommonModule对象，用来在实例化LoginPresenter时提供参数
 
+```java
+public final class DaggerCommonComponent implements CommonComponent {
+  private final CommonModule commonModule;
 
+  private DaggerCommonComponent(CommonModule commonModuleParam) {
+    this.commonModule = commonModuleParam;
+  }
 
+  @Override
+  public void inject(MainActivity activity) {
+    injectMainActivity(activity);
+  }
 
+  private MainActivity injectMainActivity(MainActivity instance) {
+    MainActivity_MembersInjector.injectPresenter(instance, loginPresenter());
+    return instance;
+  }
+
+  private LoginPresenter loginPresenter() {
+    return new LoginPresenter(CommonModule_ProvideIcommonViewFactory.provideIcommonView(commonModule));
+  }
+}
+
+public final class MainActivity_MembersInjector implements MembersInjector<MainActivity> {
+  @InjectedFieldSignature("com.example.daggersample.MainActivity.presenter")
+  public static void injectPresenter(MainActivity instance, LoginPresenter presenter) {
+    instance.presenter = presenter;
+  }
+}
+
+public final class CommonModule_ProvideIcommonViewFactory implements Factory<ICommonView> {
+  public static ICommonView provideIcommonView(CommonModule instance) {
+    return Preconditions.checkNotNullFromProvides(instance.provideIcommonView());
+  }
+}
+```
+
+DaggerCommonComponent使用建造者模式来创建实例
+
+```java
+  public static final class Builder {
+    private CommonModule commonModule;
+
+    private Builder() {
+    }
+
+    public Builder commonModule(CommonModule commonModule) {
+      this.commonModule = Preconditions.checkNotNull(commonModule);
+      return this;
+    }
+
+    public CommonComponent build() {
+      Preconditions.checkBuilderRequirement(commonModule, CommonModule.class);
+      return new DaggerCommonComponent(commonModule);
+    }
+  }
+```
+
+关键代码：
+
+```kotlin
+    override fun onCreate(@Nullable savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+        //注入presenter对象
+        DaggerCommonComponent.builder().commonModule(CommonModule(this)).build().inject(this)
+    }
+```
 
 
