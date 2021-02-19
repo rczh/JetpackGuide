@@ -27,4 +27,63 @@ class A() {
 
 优点：每次初始化Ａ对象时不需要传任何参数，降低了代码的复杂度和耦合度
 
+## 注解
+Dagger2主要包含三个部分：依赖提供方、依赖需求方、依赖注入组件
+
+### @Inject
+Inject注解有两个作用
+* 将Inject注解添加到类的构造函数上，作为依赖提供方
+
+```kotlin
+//Dagger2会使用Inject注解的构造函数来生成依赖对象
+class LoginPresenter @Inject constructor(var iView: ICommonView) {
+    fun login(user: User?) {
+        val mContext = iView.context
+        Toast.makeText(mContext, "login......", Toast.LENGTH_SHORT).show()
+    }
+}
+```
+
+* 将Inject注解添加到成员变量上，作为依赖需求方
+
+```kotlin
+class MainActivity : AppCompatActivity(){
+    //Dagger2会为Inject注解的成员变量注入依赖对象
+    @JvmField
+    @Inject
+    var presenter: LoginPresenter? = null
+}
+```
+
+### @Module
+Module注解的类作为依赖提供方，可以为构造函数提供参数
+
+```kotlin
+@Module
+class CommonModule(private val iView: ICommonView) {
+    //Dagger2使用Provides注解的方法为构造函数返回参数
+    @Provides
+    fun provideIcommonView(): ICommonView {
+        return iView
+    }
+}
+```
+
+### @Component
+Component用来注解接口，负责在依赖提供方和依赖需求方之间建立连接
+
+```kotlin
+//使用modules参数来指定相应的Module类
+@Component(modules = [CommonModule::class])
+interface CommonComponent {
+    fun inject(activity: MainActivity?)
+}
+```
+
+## 实现原理
+
+
+
+
+
 
