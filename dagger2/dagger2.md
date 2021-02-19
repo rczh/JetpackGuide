@@ -141,7 +141,7 @@ DaggerCommonComponent使用建造者模式来创建实例
   }
 ```
 
-关键代码：
+关键代码
 
 ```kotlin
     override fun onCreate(@Nullable savedInstanceState: Bundle?) {
