@@ -9,6 +9,10 @@ Room对sqlite进行了封装，用来简化数据库的操作
 
 * Dao：包含一系列访问数据库的方法。使用@Dao标记
 
+组件之间的对应关系:
+
+![](https://github.com/rczh/JetpackGuide/blob/master/room/v2-6cd8950561fafc6cb5f3307175b1513f_720w.jpg) 
+
 ## 注解
 ### @Database
 用来标记数据库类，该类需要满足以下条件：
@@ -41,6 +45,8 @@ abstract class AppDatabase : RoomDatabase() {
 }
 ```
 
+使用Room.databaseBuilder构造数据库实例。由于构造过程非常耗时，需要使用单例模式
+
 ### @Entity
 使用Entity定义的类会被映射为数据库中的一张表
 
@@ -71,4 +77,10 @@ interface UserDao {
     fun deleteUserByUser(user: User)
 }
 ```
+
+## 实现原理
+
+
+
+
 
