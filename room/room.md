@@ -79,7 +79,146 @@ interface UserDao {
 ```
 
 ## 实现原理
+Room会为AppDatabase生成实现类AppDatabase_Impl，类中包含UserDao和SupportSQLiteOpenHelper对象
 
+```java
+public final class AppDatabase_Impl extends AppDatabase {
+  private volatile UserDao _userDao;
+
+  @Override
+  protected SupportSQLiteOpenHelper createOpenHelper(DatabaseConfiguration configuration) {...}
+  ...
+  @Override
+  public UserDao userDao() {
+    if (_userDao != null) {
+      return _userDao;
+    } else {
+      synchronized(this) {
+        if(_userDao == null) {
+          _userDao = new UserDao_Impl(this);
+        }
+        return _userDao;
+      }
+    }
+  }
+}
+```
+
+通过建造者模式实例化AppDatabase_Impl对象，并且执行init方法创建SupportSQLiteOpenHelper对象
+
+```java
+public abstract class RoomDatabase {
+    private SupportSQLiteOpenHelper mOpenHelper;
+    public T build() {
+                ...
+                T db = Room.getGeneratedImplementation(mDatabaseClass, DB_IMPL_SUFFIX);
+                db.init(configuration);
+                return db;
+            }
+            
+    @CallSuper
+        public void init(@NonNull DatabaseConfiguration configuration) {
+            mOpenHelper = createOpenHelper(configuration);
+            ...
+        }
+    }
+
+```
+
+Room为UserDao生成实现类UserDao_Impl，该类实现了addUser方法
+
+```java
+public final class UserDao_Impl implements UserDao {
+  private final RoomDatabase __db;
+  private final EntityInsertionAdapter<User> __insertionAdapterOfUser;
+
+  public UserDao_Impl(RoomDatabase __db) {
+    this.__db = __db;
+    this.__insertionAdapterOfUser = new EntityInsertionAdapter<User>(__db) {...}
+  ...
+  @Override
+  public void addUser(final User user) {
+    __db.assertNotSuspendingTransaction();
+    __db.beginTransaction();
+    try {
+      __insertionAdapterOfUser.insert(user);
+      __db.setTransactionSuccessful();
+    } finally {
+      __db.endTransaction();
+    }
+  }
+
+}
+```
+
+addUser方法中使用RoomDatabase.mOpenHelper对象实现事务处理
+
+```java
+public abstract class RoomDatabase {
+    public void beginTransaction() {
+        assertNotMainThread();
+        SupportSQLiteDatabase database = mOpenHelper.getWritableDatabase();
+        mInvalidationTracker.syncTriggers(database);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN
+                && database.isWriteAheadLoggingEnabled()) {
+            database.beginTransactionNonExclusive();
+        } else {
+            database.beginTransaction();
+        }
+    }
+}
+
+```
+
+addUser方法中使用EntityInsertionAdapter.insert方法实现插入操作
+
+```java
+public abstract class EntityInsertionAdapter<T> extends SharedSQLiteStatement {
+    public final void insert(T entity) {
+        final SupportSQLiteStatement stmt = acquire();
+        try {
+            bind(stmt, entity);
+            stmt.executeInsert();
+        } finally {
+            release(stmt);
+        }
+    }
+}
+```
+
+bind方法用来将参数保存到mBindArgs数组中
+
+```java
+public abstract class SQLiteProgram extends SQLiteClosable {
+    private void bind(int index, Object value) {
+            if (index < 1 || index > mNumParameters) {
+                throw new IllegalArgumentException("Cannot bind argument at index "
+                        + index + " because the index is out of range.  "
+                        + "The statement has " + mNumParameters + " parameters.");
+            }
+            mBindArgs[index - 1] = value;
+        }
+｝
+```
+
+executeInsert方法用来执行具体sql语句
+
+```java
+public final class SQLiteStatement extends SQLiteProgram {
+    public long executeInsert() {
+        acquireReference();
+        try {
+            return getSession().executeForLastInsertedRowId(
+                    getSql(), getBindArgs(), getConnectionFlags(), null);
+        } catch (SQLiteDatabaseCorruptException ex) {
+            onCorruption();
+            throw ex;
+        } finally {
+            releaseReference();
+        }
+    }
+}
+```
 
 
 
