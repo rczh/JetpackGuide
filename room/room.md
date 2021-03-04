@@ -191,12 +191,7 @@ bind方法用来将参数保存到mBindArgs数组中
 ```java
 public final class UserDao_Impl implements UserDao {
   public UserDao_Impl(RoomDatabase __db) {
-    this.__db = __db;
     this.__insertionAdapterOfUser = new EntityInsertionAdapter<User>(__db) {
-      @Override
-      public String createQuery() {
-        return "INSERT OR REPLACE INTO `USERS` (`userId`,`user_name`,`user_phone`,`address`) VALUES (nullif(?, 0),?,?,?)";
-      }
 
       @Override
       public void bind(SupportSQLiteStatement stmt, User value) {
@@ -205,16 +200,6 @@ public final class UserDao_Impl implements UserDao {
           stmt.bindNull(2);
         } else {
           stmt.bindString(2, value.getUserName());
-        }
-        if (value.getUserPhone() == null) {
-          stmt.bindNull(3);
-        } else {
-          stmt.bindString(3, value.getUserPhone());
-        }
-        if (value.getAddress() == null) {
-          stmt.bindNull(4);
-        } else {
-          stmt.bindString(4, value.getAddress());
         }
       }
     }
