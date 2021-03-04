@@ -79,7 +79,7 @@ interface UserDao {
 ```
 
 ## 实现原理
-Room会为AppDatabase生成实现类AppDatabase_Impl，类中包含UserDao和SupportSQLiteOpenHelper对象
+Room会为AppDatabase生成实现类AppDatabase_Impl，其中包含UserDao和SupportSQLiteOpenHelper对象
 
 ```java
 public final class AppDatabase_Impl extends AppDatabase {
@@ -125,7 +125,7 @@ public abstract class RoomDatabase {
 
 ```
 
-Room为UserDao生成实现类UserDao_Impl，该类实现了addUser方法
+Room为UserDao生成实现类UserDao_Impl，该类中实现了addUser方法
 
 ```java
 public final class UserDao_Impl implements UserDao {
@@ -189,6 +189,37 @@ public abstract class EntityInsertionAdapter<T> extends SharedSQLiteStatement {
 bind方法用来将参数保存到mBindArgs数组中
 
 ```java
+public final class UserDao_Impl implements UserDao {
+  public UserDao_Impl(RoomDatabase __db) {
+    this.__db = __db;
+    this.__insertionAdapterOfUser = new EntityInsertionAdapter<User>(__db) {
+      @Override
+      public String createQuery() {
+        return "INSERT OR REPLACE INTO `USERS` (`userId`,`user_name`,`user_phone`,`address`) VALUES (nullif(?, 0),?,?,?)";
+      }
+
+      @Override
+      public void bind(SupportSQLiteStatement stmt, User value) {
+        stmt.bindLong(1, value.getUserId());
+        if (value.getUserName() == null) {
+          stmt.bindNull(2);
+        } else {
+          stmt.bindString(2, value.getUserName());
+        }
+        if (value.getUserPhone() == null) {
+          stmt.bindNull(3);
+        } else {
+          stmt.bindString(3, value.getUserPhone());
+        }
+        if (value.getAddress() == null) {
+          stmt.bindNull(4);
+        } else {
+          stmt.bindString(4, value.getAddress());
+        }
+      }
+    }
+}
+
 public abstract class SQLiteProgram extends SQLiteClosable {
     private void bind(int index, Object value) {
             if (index < 1 || index > mNumParameters) {
@@ -219,7 +250,4 @@ public final class SQLiteStatement extends SQLiteProgram {
     }
 }
 ```
-
-
-
 
